@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    width: 100%;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #7FFF7F;
+    padding: 20px;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+dt, dd {
+    margin: 0;
+}
+
+ul li {
+    list-style-type: none;
+}
+
+ul li a {
+    text-decoration: none;
+    color: black;
+}
+
+dt {
+    font-weight: bold;
+}
+
+dd {
+    margin-left: 20px;
+}

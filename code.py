@@ -12,7 +12,7 @@ def login():
 @app.route('/index')
 def index():
     # Code pour la page principale avec la barre latérale gauche et les mini-jeux (pas encore implémenté)
-    return "Page principale avec barre latérale gauche et mini-jeux"
+    return render_template('left_menu.html')
 
 # Chemin vers le jeu "Trouver joueurs avec image"
 @app.route('/jeu/trouver-joueurs-avec-image')
