@@ -2,14 +2,14 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# Chemin vers la page de login
-@app.route('/login')
+# Chemin vers la page de login (page principale)
+@app.route('/')
 def login():
     # Code pour la page de login (pas encore implémenté)
-    return "Page de login"
+    return render_template('login.html')
 
 # Chemin vers la page principale
-@app.route('/')
+@app.route('/index')
 def index():
     # Code pour la page principale avec la barre latérale gauche et les mini-jeux (pas encore implémenté)
     return "Page principale avec barre latérale gauche et mini-jeux"

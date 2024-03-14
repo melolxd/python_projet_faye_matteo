@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('https://example.com/background.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        form {
+            width: 300px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px 10px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <img src="https://example.com/logo.png" alt="Logo">
+        <label for="username">MAIL:</label>
+        <input type="text" id="username" name="username">
+
+        <label for="password">MOT DE PASSE:</label>
+        <input type="password" id="password" name="password">
+
+        <input type="submit" value="Connexion">
+    </form>
+</body>
+</html>
