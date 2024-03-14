@@ -1,0 +1,11 @@
+*.pyc
+
+venv/
+
+.idea/
+
+*.log
+
+config.ini
+
+.DS_Store
