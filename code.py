@@ -2,8 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
-import requests
-from bs4 import BeautifulSoup
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -152,20 +150,6 @@ def login_post():
 
     # Redirect to root page after successful login
     return redirect(url_for('root'))
-
-@app.route('/result')
-def result():
-    response = requests.get('https://www.sofascore.com/team/football/barcelona/2817')
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.content, 'html.parser')
-        # Supposons que vous souhaitez extraire des informations spécifiques de la page ici
-        # Par exemple, le titre de la page
-        title = soup.title.string
-        return render_template('result.html', title=title)
-    else:
-        # Gérer les cas où la requête échoue
-        return render_template('error.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
