@@ -3,6 +3,7 @@
 <head>
     <title>Login Page</title>
     <style>
+        /* Votre CSS existant */
         body {
             display: flex;
             justify-content: center;
@@ -50,6 +51,12 @@
             height: auto;
             border-radius: 10px 10px 0 0;
         }
+        /* Nouveau style pour les messages d'erreur */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -57,9 +64,15 @@
         <img src="https://example.com/logo.png" alt="Logo">
         <label for="email_or_username">Email ou Pseudo:</label>
         <input type="text" id="email_or_username" name="email_or_username">
+        {% if error_email_or_username %}
+            <span class="error-message">{{ error_email_or_username }}</span>
+        {% endif %}
 
         <label for="password">Mot de passe:</label>
         <input type="password" id="password" name="password">
+        {% if error_password %}
+            <span class="error-message">{{ error_password }}</span>
+        {% endif %}
 
         <input type="submit" value="Connexion">
     </form>

@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
+import re
 
 app = Flask(__name__, template_folder='templates')
 
-# Fonction pour initialiser la base de données en exécutant le script SQL depuis un fichier
+# Function to initialize the database by executing the SQL script from a file
 def init_db():
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
@@ -15,7 +16,24 @@ def init_db():
 
 init_db()
 
-# Fonction pour ajouter un utilisateur à la base de données
+def validate_email(email):
+    regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(regex, email)
+
+def validate_password(password):
+    # Au moins 6 caractères
+    if len(password) < 6:
+        return False
+    # Au moins un chiffre
+    if not any(char.isdigit() for char in password):
+        return False
+    # Au moins un symbole
+    if not any(char.isalnum() for char in password):
+        return False
+    return True
+
+
+# Function to add a user to the database
 def add_user(email, username, password_hash):
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
@@ -25,7 +43,7 @@ def add_user(email, username, password_hash):
     conn.commit()
     conn.close()
 
-# Fonction pour récupérer un utilisateur par son email ou son username
+# Function to retrieve a user by their email or username
 def get_user(email_or_username):
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
@@ -36,7 +54,7 @@ def get_user(email_or_username):
     conn.close()
     return user
 
-# Fonction pour vérifier le mot de passe d'un utilisateur
+# Function to check a user's password
 def check_password(user, password):
     if user and check_password_hash(user[3], password):
         return True
@@ -44,8 +62,8 @@ def check_password(user, password):
         return False
 
 @app.route('/')
-def racine():
-    return render_template('racine.html')
+def root():
+    return render_template('root.html')
 
 @app.route('/login')
 def login():
@@ -61,32 +79,53 @@ def register_post():
     username = request.form['username']
     password = request.form['password']
     confirm_password = request.form['confirm_password']
+    error_email = None
+    error_username = None
+    error_password = None
+    error_confirm_password = None
 
-    if password != confirm_password:
-        return 'Les mots de passe ne correspondent pas. Veuillez réessayer.'
+    # Validation de l'email
+    if not validate_email(email):
+        error_email = 'Adresse email invalide.'
 
-    existing_user = get_user(email)
-    if existing_user:
-        return 'Cet email est déjà utilisé. Veuillez en choisir un autre.'
-    existing_username = get_user(username)
-    if existing_username:
-        return 'Ce pseudo est déjà utilisé. Veuillez en choisir un autre.'
+    # Validation du mot de passe
+    if not validate_password(password):
+        error_password = 'Le mot de passe doit avoir au moins 6 caractères, un chiffre et un symbole.'
+    elif password != confirm_password:
+        error_confirm_password = 'Les mots de passe ne correspondent pas.'
+
+    # Si des erreurs sont présentes, les renvoyer à la page d'inscription
+    if error_email or error_password or error_confirm_password:
+        return render_template('register.html', error_email=error_email, error_username=error_username,
+                               error_password=error_password, error_confirm_password=error_confirm_password)
 
     password_hash = generate_password_hash(password)
     add_user(email, username, password_hash)
 
-    return 'Inscription réussie. Vous pouvez maintenant vous connecter.'
+    # Redirection vers la page de connexion après inscription réussie
+    return redirect(url_for('login'))
+
+
 
 @app.route('/login', methods=['POST'])
 def login_post():
     email_or_username = request.form['email_or_username']
     password = request.form['password']
+    error_email_or_username = None
+    error_password = None
 
     user = get_user(email_or_username)
-    if check_password(user, password):
-        return 'Connexion réussie.'
-    else:
-        return 'Identifiants incorrects. Veuillez réessayer.'
+    if not user:
+        error_email_or_username = 'Email ou pseudo incorrect.'
+    elif not check_password(user, password):
+        error_password = 'Mot de passe incorrect.'
+
+    if error_email_or_username or error_password:
+        return render_template('login.html', error_email_or_username=error_email_or_username, error_password=error_password)
+
+    # Redirect to root page after successful login
+    return redirect(url_for('root'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
