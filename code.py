@@ -73,6 +73,11 @@ def login():
 def register():
     return render_template('register.html')
 
+@app.route('/discover')
+def discover():
+    return render_template('discover.html')
+
+
 @app.route('/register', methods=['POST'])
 def register_post():
     email = request.form['email']
@@ -124,7 +129,7 @@ def login_post():
         return render_template('login.html', error_email_or_username=error_email_or_username, error_password=error_password)
 
     # Redirect to root page after successful login
-    return redirect(url_for('root'))
+    return redirect(url_for('discover'))
 
 
 if __name__ == '__main__':
