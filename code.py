@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
+import requests
+from bs4 import BeautifulSoup
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -111,13 +113,13 @@ def register_post():
 
     # Validate email
     if not validate_email(email):
-        error_email = 'Invalid email address.'
+        error_email = 'Adresse mail invalide.'
 
     # Validate password
     if not validate_password(password):
-        error_password = 'Password must have at least 6 characters, one digit, and one symbol.'
+        error_password = 'Le mot de passe doit comporter au moins 6 caractères, un chiffre et un symbole..'
     elif password != confirm_password:
-        error_confirm_password = 'Passwords do not match.'
+        error_confirm_password = 'Les mots de passe ne correspondent pas.'
 
     # If errors present, return to registration page
     if error_email or error_password or error_confirm_password:
@@ -141,7 +143,7 @@ def login_post():
     if not user:
         error_email_or_username = 'Incorrect email or username.'
     elif not check_password(user, password):
-        error_password = 'Incorrect password.'
+        error_password = 'Mot de passe incorrect'
     else:
         session['user_id'] = user[0]
 
@@ -150,6 +152,20 @@ def login_post():
 
     # Redirect to root page after successful login
     return redirect(url_for('root'))
+
+@app.route('/result')
+def result():
+    response = requests.get('https://www.sofascore.com/team/football/barcelona/2817')
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, 'html.parser')
+        # Supposons que vous souhaitez extraire des informations spécifiques de la page ici
+        # Par exemple, le titre de la page
+        title = soup.title.string
+        return render_template('result.html', title=title)
+    else:
+        # Gérer les cas où la requête échoue
+        return render_template('error.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
