@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
@@ -64,21 +64,35 @@ def check_password(user, password):
 @app.route('/')
 def root():
     if 'user_id' in session:
-        return redirect(url_for('discover'))
+        return redirect('/discover')
     else:
         return render_template('root.html')
 
 @app.route('/login')
 def login():
     if 'user_id' in session:
-        return redirect(url_for('discover'))
+        return redirect('/discover')
     else:
         return render_template('login.html')
+
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    if user:
+        return render_template('profile.html', user=user)
+    else:
+        return "Utilisateur introuvable"
+
+
 
 @app.route('/register')
 def register():
     if 'user_id' in session:
-        return redirect(url_for('discover'))
+        return redirect('/discover')
     else:
         return render_template('register.html')
 
@@ -87,7 +101,8 @@ def discover():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     else:
-        return render_template('discover.html')
+        user = get_user(session['user_id'])
+        return render_template('discover.html', user=user)
 
 @app.route('/logout')
 def logout():
@@ -96,7 +111,7 @@ def logout():
 @app.route('/logout-confirm', methods=['POST'])
 def logout_confirm():
     session.pop('user_id', None)
-    return redirect(url_for('root'))
+    return redirect('/')
 
 @app.route('/register', methods=['POST'])
 def register_post():
@@ -111,13 +126,13 @@ def register_post():
 
     # Validate email
     if not validate_email(email):
-        error_email = 'Adresse mail invalide.'
+        error_email = 'Invalid email address.'
 
     # Validate password
     if not validate_password(password):
-        error_password = 'Le mot de passe doit comporter au moins 6 caractères, un chiffre et un symbole..'
+        error_password = 'Password must have at least 6 characters, one digit, and one symbol.'
     elif password != confirm_password:
-        error_confirm_password = 'Les mots de passe ne correspondent pas.'
+        error_confirm_password = 'Passwords do not match.'
 
     # If errors present, return to registration page
     if error_email or error_password or error_confirm_password:
@@ -128,7 +143,7 @@ def register_post():
     add_user(email, username, password_hash)
 
     # Redirect to login page after successful registration
-    return redirect(url_for('login'))
+    return redirect('/login')
 
 @app.route('/login', methods=['POST'])
 def login_post():
@@ -141,7 +156,7 @@ def login_post():
     if not user:
         error_email_or_username = 'Incorrect email or username.'
     elif not check_password(user, password):
-        error_password = 'Mot de passe incorrect'
+        error_password = 'Incorrect password.'
     else:
         session['user_id'] = user[0]
 
@@ -149,7 +164,7 @@ def login_post():
         return render_template('login.html', error_email_or_username=error_email_or_username, error_password=error_password)
 
     # Redirect to root page after successful login
-    return redirect(url_for('root'))
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run(debug=True)
