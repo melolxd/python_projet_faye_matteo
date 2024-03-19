@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
@@ -14,8 +14,6 @@ def init_db():
         cursor.executescript(f.read())
     conn.commit()
     conn.close()
-
-init_db()
 
 def validate_email(email):
     regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
@@ -64,35 +62,21 @@ def check_password(user, password):
 @app.route('/')
 def root():
     if 'user_id' in session:
-        return redirect('/discover')
+        return redirect(url_for('discover'))
     else:
         return render_template('root.html')
 
 @app.route('/login')
 def login():
     if 'user_id' in session:
-        return redirect('/discover')
+        return redirect(url_for('discover'))
     else:
         return render_template('login.html')
-
-@app.route('/profile')
-def profile():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    user_id = session['user_id']
-    user = get_user_by_id(user_id)
-    if user:
-        return render_template('profile.html', user=user)
-    else:
-        return "Utilisateur introuvable"
-
-
 
 @app.route('/register')
 def register():
     if 'user_id' in session:
-        return redirect('/discover')
+        return redirect(url_for('discover'))
     else:
         return render_template('register.html')
 
@@ -101,8 +85,7 @@ def discover():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     else:
-        user = get_user(session['user_id'])
-        return render_template('discover.html', user=user)
+        return render_template('discover.html')
 
 @app.route('/logout')
 def logout():
@@ -111,7 +94,7 @@ def logout():
 @app.route('/logout-confirm', methods=['POST'])
 def logout_confirm():
     session.pop('user_id', None)
-    return redirect('/')
+    return redirect(url_for('root'))
 
 @app.route('/register', methods=['POST'])
 def register_post():
@@ -126,13 +109,13 @@ def register_post():
 
     # Validate email
     if not validate_email(email):
-        error_email = 'Invalid email address.'
+        error_email = 'Adresse mail invalide.'
 
     # Validate password
     if not validate_password(password):
-        error_password = 'Password must have at least 6 characters, one digit, and one symbol.'
+        error_password = 'Le mot de passe doit comporter au moins 6 caractères, un chiffre et un symbole..'
     elif password != confirm_password:
-        error_confirm_password = 'Passwords do not match.'
+        error_confirm_password = 'Les mots de passe ne correspondent pas.'
 
     # If errors present, return to registration page
     if error_email or error_password or error_confirm_password:
@@ -143,7 +126,7 @@ def register_post():
     add_user(email, username, password_hash)
 
     # Redirect to login page after successful registration
-    return redirect('/login')
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['POST'])
 def login_post():
@@ -156,7 +139,7 @@ def login_post():
     if not user:
         error_email_or_username = 'Incorrect email or username.'
     elif not check_password(user, password):
-        error_password = 'Incorrect password.'
+        error_password = 'Mot de passe incorrect'
     else:
         session['user_id'] = user[0]
 
@@ -164,7 +147,61 @@ def login_post():
         return render_template('login.html', error_email_or_username=error_email_or_username, error_password=error_password)
 
     # Redirect to root page after successful login
-    return redirect('/')
+    return redirect(url_for('root'))
+
+@app.route('/write-article', methods=['GET', 'POST'])
+def write_article():
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        author_id = session['user_id']
+
+        conn = sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO articles (title, content, author_id) VALUES (?, ?, ?)
+        ''', (title, content, author_id))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('discover'))
+    else:
+        return render_template('write-article.html')
+
+@app.route('/articles')
+def articles():
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT articles.id, articles.title, articles.content, users.username
+        FROM articles
+        INNER JOIN users ON articles.author_id = users.id
+        ORDER BY articles.created_at DESC
+    ''')
+    articles = cursor.fetchall()
+    conn.close()
+    return render_template('articles.html', articles=articles)
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    if request.method == 'POST':
+        query = request.form['query']
+        conn = sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT articles.id, articles.title, articles.content, users.username
+            FROM articles
+            INNER JOIN users ON articles.author_id = users.id
+            WHERE articles.title LIKE ? OR articles.content LIKE ?
+            ORDER BY articles.created_at DESC
+        ''', (f'%{query}%', f'%{query}%'))
+        articles = cursor.fetchall()
+        conn.close()
+        return render_template('search-results.html', articles=articles, query=query)
+    else:
+        return render_template('search.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+    init_db()

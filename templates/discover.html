@@ -73,8 +73,12 @@
             <p>Restez informé des dernières actualités et annonces du FC Barcelona.</p>
             <a href="/result" class="button">Voir les actualités</a>
         </div>
+        <div class="section">
+            <h2>Écrire un article</h2>
+            <p>Partagez vos connaissances et votre passion pour le FC Barcelona en écrivant un article.</p>
+            <a href="{{ url_for('write_article') }}" class="button">Écrire un article</a>
+        </div>
         {% include 'logout.html' %}
-        {% include 'profile.html' %}
     </div>
 </body>
 </html>
