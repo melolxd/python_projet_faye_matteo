@@ -91,11 +91,6 @@ def discover():
 def logout():
     return render_template('logout.html')
 
-@app.route('/logout-confirm', methods=['POST'])
-def logout_confirm():
-    session.pop('user_id', None)
-    return redirect(url_for('root'))
-
 @app.route('/register', methods=['POST'])
 def register_post():
     email = request.form['email']
@@ -112,27 +107,6 @@ def register_post():
         error_email = 'Adresse mail invalide.'
     elif get_user(email):
         error_email = 'Cette adresse e-mail est déjà utilisée.'
-
-    # Validate password
-    if not validate_password(password):
-        error_password = 'Le mot de passe doit comporter au moins 6 caractères, un chiffre et un symbole..'
-    elif password != confirm_password:
-        error_confirm_password = 'Les mots de passe ne correspondent pas.'
-
-    # If errors present, return to registration page
-    if error_email or error_password or error_confirm_password:
-        return render_template('register.html', error_email=error_email, error_username=error_username,
-                               error_password=error_password, error_confirm_password=error_confirm_password)
-
-    password_hash = generate_password_hash(password)
-    add_user(email, username, password_hash)
-
-    # Redirect to login page after successful registration
-    return redirect(url_for('login'))
-
-    # Validate email
-    if not validate_email(email):
-        error_email = 'Adresse mail invalide.'
 
     # Validate password
     if not validate_password(password):

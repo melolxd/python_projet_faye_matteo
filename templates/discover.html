@@ -54,29 +54,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Découvrir le FC Barcelona</h1>
+        <h1>Découvrir le FC Barcelona</h1>       
         
         <div class="section">
-            <h2>Équipe</h2>
-            <p>Découvrez les joueurs de l'équipe première du FC Barcelona.</p>
-            <a href="#" class="button">Voir l'équipe</a>
-        </div>
-
-        <div class="section">
-            <h2>Histoire</h2>
-            <p>Explorez l'histoire et les réalisations du FC Barcelona.</p>
-            <a href="#" class="button">Explorer l'histoire</a>
-        </div>
-
-        <div class="section">
-            <h2>Actualités</h2>
-            <p>Restez informé des dernières actualités et annonces du FC Barcelona.</p>
-            <a href="/result" class="button">Voir les actualités</a>
-        </div>
-        <div class="section">
-            <h2>Écrire un article</h2>
-            <p>Partagez vos connaissances et votre passion pour le FC Barcelona en écrivant un article.</p>
-            <a href="{{ url_for('write_article') }}" class="button">Écrire un article</a>
+            <h2>Articles</h2>
+            <p>Consultez les articles écrits par les utilisateurs.</p>
+            <a href="/articles" class="button">Voir les articles</a>
         </div>
         {% include 'logout.html' %}
     </div>
