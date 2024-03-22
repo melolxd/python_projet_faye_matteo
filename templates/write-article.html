@@ -1,20 +1,80 @@
-<!-- write-article.html -->
+<!--write-article.html-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Écrire un article</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: auto;
+            padding: 50px 30px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Écrire un article</h1>
-    <form method="post">
-        <label for="title">Titre :</label>
-        <input type="text" name="title" required><br>
-        <label for="content">Contenu :</label>
-        <textarea name="content" required></textarea><br>
-        <input type="submit" value="Publier">
-    </form>
-    {% include 'back.html' %}
+    <div class="container">
+        <h1>Écrire un article</h1>
+        <form method="post">
+            <label for="title">Titre :</label>
+            <input type="text" name="title" required><br>
+            <label for="content">Contenu :</label>
+            <textarea name="content" required></textarea><br>
+            <input type="submit" value="Publier">
+        </form>
+        {% include 'back.html' %}
+    </div>
 </body>
 </html>

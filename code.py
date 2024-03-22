@@ -110,6 +110,29 @@ def register_post():
     # Validate email
     if not validate_email(email):
         error_email = 'Adresse mail invalide.'
+    elif get_user(email):
+        error_email = 'Cette adresse e-mail est déjà utilisée.'
+
+    # Validate password
+    if not validate_password(password):
+        error_password = 'Le mot de passe doit comporter au moins 6 caractères, un chiffre et un symbole..'
+    elif password != confirm_password:
+        error_confirm_password = 'Les mots de passe ne correspondent pas.'
+
+    # If errors present, return to registration page
+    if error_email or error_password or error_confirm_password:
+        return render_template('register.html', error_email=error_email, error_username=error_username,
+                               error_password=error_password, error_confirm_password=error_confirm_password)
+
+    password_hash = generate_password_hash(password)
+    add_user(email, username, password_hash)
+
+    # Redirect to login page after successful registration
+    return redirect(url_for('login'))
+
+    # Validate email
+    if not validate_email(email):
+        error_email = 'Adresse mail invalide.'
 
     # Validate password
     if not validate_password(password):
@@ -181,26 +204,6 @@ def articles():
     articles = cursor.fetchall()
     conn.close()
     return render_template('articles.html', articles=articles)
-
-@app.route('/search', methods=['GET', 'POST'])
-def search():
-    if request.method == 'POST':
-        query = request.form['query']
-        conn = sqlite3.connect('mydatabase.db')
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT articles.id, articles.title, articles.content, users.username
-            FROM articles
-            INNER JOIN users ON articles.author_id = users.id
-            WHERE articles.title LIKE ? OR articles.content LIKE ?
-            ORDER BY articles.created_at DESC
-        ''', (f'%{query}%', f'%{query}%'))
-        articles = cursor.fetchall()
-        conn.close()
-        return render_template('search-results.html', articles=articles, query=query)
-    else:
-        return render_template('search.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
