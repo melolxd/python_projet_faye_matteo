@@ -91,6 +91,11 @@ def discover():
 def logout():
     return render_template('logout.html')
 
+@app.route('/logout-confirm', methods=['POST'])
+def logout_confirm():
+    session.pop('user_id', None)
+    return redirect(url_for('root'))
+
 @app.route('/register', methods=['POST'])
 def register_post():
     email = request.form['email']
@@ -104,15 +109,15 @@ def register_post():
 
     # Validate email
     if not validate_email(email):
-        error_email = 'Adresse mail invalide.'
+        error_email = 'Invalid email address.'
     elif get_user(email):
-        error_email = 'Cette adresse e-mail est déjà utilisée.'
+        error_email = 'This email address is already in use.'
 
     # Validate password
     if not validate_password(password):
-        error_password = 'Le mot de passe doit comporter au moins 6 caractères, un chiffre et un symbole..'
+        error_password = 'Password must contain at least 6 characters, a digit and a symbol.'
     elif password != confirm_password:
-        error_confirm_password = 'Les mots de passe ne correspondent pas.'
+        error_confirm_password = 'Passwords do not match.'
 
     # If errors present, return to registration page
     if error_email or error_password or error_confirm_password:
@@ -136,7 +141,7 @@ def login_post():
     if not user:
         error_email_or_username = 'Incorrect email or username.'
     elif not check_password(user, password):
-        error_password = 'Mot de passe incorrect'
+        error_password = 'Incorrect password'
     else:
         session['user_id'] = user[0]
 
@@ -179,6 +184,55 @@ def articles():
     conn.close()
     return render_template('articles.html', articles=articles)
 
+def add_comment(article_id, user_id, content):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO comments (article_id, user_id, content) VALUES (?, ?, ?)
+    ''', (article_id, user_id, content))
+    conn.commit()
+    conn.close()
+
+def get_comments_by_article_id(article_id):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT comments.id, comments.content, users.username
+        FROM comments
+        INNER JOIN users ON comments.user_id = users.id
+        WHERE comments.article_id = ?
+        ORDER BY comments.created_at DESC
+    ''', (article_id,))
+    comments = cursor.fetchall()
+    conn.close()
+    return comments
+
+@app.route('/articles/<int:article_id>')
+def article(article_id):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT articles.id, articles.title, articles.content, users.username
+        FROM articles
+        INNER JOIN users ON articles.author_id = users.id
+        WHERE articles.id = ?
+    ''', (article_id,))
+    article = cursor.fetchone()
+    conn.close()
+
+    comments = get_comments_by_article_id(article_id)
+
+    return render_template('article.html', article=article, comments=comments)
+
+@app.route('/articles/<int:article_id>/comments', methods=['POST'])
+def add_article_comment(article_id):
+    content = request.form['content']
+    user_id = session['user_id']
+
+    add_comment(article_id, user_id, content)
+
+    return redirect(url_for('article', article_id=article_id))
+
 if __name__ == '__main__':
-    app.run(debug=True)
     init_db()
+    app.run(debug=True)

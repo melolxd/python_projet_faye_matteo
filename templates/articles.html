@@ -1,4 +1,4 @@
-<!--articles.html!-->
+<!--articles.html-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -52,6 +52,30 @@
             color: #666;
             margin-bottom: 5px;
         }
+
+        form {
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            resize: none;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -63,6 +87,18 @@
                     <h2>{{ article[1] }}</h2>
                     <p>Par {{ article[3] }}</p>
                     <p>{{ article[2] }}</p>
+                    <ul>
+                        {% for comment in article[4] %}
+                            <li>
+                                <p>{{ comment[1] }}</p>
+                                <p>Par {{ comment[2] }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <form method="post" action="/articles/{{ article[0] }}/comments">
+                        <textarea name="content" required></textarea>
+                        <input type="submit" value="Commenter">
+                    </form>
                 </li>
             {% endfor %}
         </ul>
